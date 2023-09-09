@@ -1,5 +1,7 @@
 import streamlit as st
-# Import necessary libraries for data manipulation and visualization, e.g., pandas, plotly.
+import pandas as pd
+import plotly.graph_objects as go
+import numpy as np
 
 def main():
     st.title("Real-Time Inequality")
@@ -26,45 +28,118 @@ def main():
     elif choice == "About the Authors":
         about_authors()
 
+def load_dataset(file_name: str) -> pd.DataFrame:
+    """Load dataset from the specified file name."""
+    return pd.read_csv('personal_income - introduction function.csv')
+
+def create_visualization(data: pd.DataFrame) -> go.Figure:
+    """Create an interactive stacked area chart based on the dataset."""
+    
+    # Filter and transpose the data
+    categories = [
+        "    Compensation of employees",
+        "        Wages and salaries",
+        "    Proprietors' income with inventory valuation and capital consumption adjustments"
+    ]
+    filtered_data = data[data.iloc[:, 0].isin(categories)]
+    transposed_data = filtered_data.set_index(filtered_data.columns[0]).T
+    
+    # Define milestones for annotations
+    milestones = {
+        "2007": "Start of Great Recession",
+        "2009": "End of Great Recession",
+        "2020": "COVID-19 Pandemic",
+        "2021": "Vaccine Rollout & Economic Challenges"
+    }
+    
+    # Create the figure
+    fig = go.Figure()
+
+    # Add data for each category
+    for category in categories:
+        fig.add_trace(go.Scatter(
+            x=transposed_data.index,
+            y=transposed_data[category].replace(',', '', regex=True).astype(float),
+            mode='lines',
+            stackgroup='one',
+            name=category
+        ))
+
+    # Add annotations for milestones
+    annotations = []
+    for year, event in milestones.items():
+        annotations.append(
+            dict(
+                x=year,
+                y=np.max(transposed_data.replace(',', '', regex=True).astype(float).sum(axis=1)),
+                xref="x",
+                yref="y",
+                text=event,
+                showarrow=True,
+                arrowhead=4,
+                ax=0,
+                ay=-40
+            )
+        )
+
+    # Update figure layout
+    fig.update_layout(
+        title='Composition of Personal Income Over Time',
+        xaxis_title='Year',
+        yaxis_title='Amount ($ in billions)',
+        annotations=annotations,
+        plot_bgcolor='white',
+        xaxis_showgrid=True,
+        yaxis_showgrid=True,
+        xaxis_gridcolor='lightgray',
+        yaxis_gridcolor='lightgray'
+    )
+    
+    return fig
+
+
 def introduction():
     st.subheader("Introduction to Real-Time Inequality")
-    # Content from the paper's introduction, possibly with a banner image or introductory video
-    # Augmented visualization: Interactive pie chart showing income distribution at a high level
 
+    # Extracted content from the paper's introduction
+    st.write("""
+    "Real-Time Inequality" presents a new methodology offering timely and high-frequency estimates of income distribution in the U.S. This method integrates various public data sources into a unified framework, with retrospective validation back to 1976.
+    """)
+
+    st.write("""
+    The significance of real-time analysis in income distribution is paramount. By tracking the distributional impacts of government policies in real-time, we gain insights for data-informed policy decisions.
+    """)
+
+    # Load the dataset (NIPA data)
+    data = load_dataset("personal_income - introduction function.csv")
+
+    # Create a visualization based on the dataset
+    fig = create_visualization(data)
+
+    # Display the visualization
+    st.plotly_chart(fig)
+
+# Placeholder functions for other sections
 def interactive_timeline():
-    st.subheader("Research Timeline")
-    # Slider or interactive timeline highlighting key milestones from the paper
-    # Augmented visualization: Interactive line chart comparing GDI to GDP growth over time
+    pass
 
 def data_dive():
-    st.subheader("Data Exploration")
-    # Allow users to explore datasets, with interactive tables and filters
-    # Augmented visualization: Interactive scatter plot comparing variables like wage growth and job growth
+    pass
 
 def visual_insights():
-    st.subheader("Visual Insights")
-    # Interactive charts based on research findings
-    # Augmented visualization: Interactive bar chart showing income distribution by demographics like race, gender, etc.
+    pass
 
 def discussion_implications():
-    st.subheader("Discussion & Implications")
-    # Key takeaways and broader implications
-    # Augmented visualization: Heatmap or geographic visualization highlighting areas with the most pronounced inequality
+    pass
 
 def qa_section():
-    st.subheader("Anticipated Questions & Answers")
-    # List out common questions and their answers
-    # Augmented visualization: Dynamic charts or graphs that change based on the question selected
+    pass
 
 def conclusion():
-    st.subheader("Conclusion")
-    # Summarize the research and presentation
-    # Augmented visualization: Summary chart showing the key metrics discussed in the paper
+    pass
 
 def about_authors():
-    st.subheader("About the Authors")
-    # Brief bios and pictures of the authors
-    # Augmented visualization: A carousel or slideshow with pictures and short bios
+    pass
 
 if __name__ == "__main__":
     main()
