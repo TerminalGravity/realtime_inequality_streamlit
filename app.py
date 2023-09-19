@@ -34,8 +34,9 @@ def growth_fluctuations():
     
 def dominant_components():
     st.subheader("Dominant Income Components")
-    dominant_components = ["Wages and salaries", "Compensation of employees"]
-    st.line_chart(personal_income_data[dominant_components], use_container_width=True)
+    dominant_components_corrected = ["    Compensation of employees", "    Wages and salaries"]
+    st.line_chart(personal_income_data[dominant_components_corrected], use_container_width=True)
+
 
 def interactive_data_exploration():
     st.subheader("Interactive Data Exploration")
